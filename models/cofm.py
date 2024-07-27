@@ -230,41 +230,6 @@ class DualBlock(nn.Module):
         return out
 
 
-class DualBlock1(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, expand_ratio=4, drop=0., drop_path=0.,
-                 layer_scale_init_value=1e-5, post_norm=True, use_dcn=True):
-        super(DualBlock1, self).__init__()
-
-        if use_dcn:
-            self.block1 = DCNBlock(in_channels, kernel_size, drop, drop_path, layer_scale_init_value, post_norm)
-            self.block2 = FreBlock(in_channels, out_channels, stride, expand_ratio, drop_path, layer_scale_init_value)
-        else:
-            self.block1 = FreBlock(in_channels, out_channels, stride, expand_ratio, drop_path, layer_scale_init_value)
-            self.block2 = FreBlock(out_channels, out_channels, 1, expand_ratio, drop_path, layer_scale_init_value)
-
-    def forward(self, x):
-
-        out = self.block1(x)
-        out = self.block2(out)
-
-        return out
-
-
-class DualBlock2(nn.Module):
-    def __init__(self, channels, kernel_size=3, drop=0., drop_path=0., layer_scale_init_value=1e-5, post_norm=True):         
-        super(DualBlock2, self).__init__()
-
-        self.block1 = DCNBlock(channels, kernel_size, drop, drop_path, layer_scale_init_value, post_norm)
-        self.block2 = DCNBlock(channels, kernel_size, drop, drop_path, layer_scale_init_value, post_norm)
-     
-    def forward(self, x):
-
-        out = self.block1(x)
-        out = self.block2(out)
-
-        return out
-
-
 def make_layers(in_channels, out_channels, layers, expand_ratio, drop, dpr_list, stride=1,
                 layer_scale_init_value=1e-5, block_type='C', use_dcn=True):
     assert block_type in ['C', 'T']
@@ -286,41 +251,6 @@ def make_layers(in_channels, out_channels, layers, expand_ratio, drop, dpr_list,
                 DualBlock(out_channels, out_channels, stride=1, expand_ratio=expand_ratio, drop=drop,
                           drop_path=dpr_list[block_idx], layer_scale_init_value=layer_scale_init_value, use_dcn=use_dcn))
             
-    return nn.Sequential(*blocks)
-
-
-def make_layers2(in_channels, out_channels, layers, expand_ratio, dpr_list, stride=1,
-                 layer_scale_init_value=1e-5, block_type='C'):
-    assert block_type in ['C', 'T']
-    blocks = []
-
-    if block_type == 'C':
-        blocks.append(
-            MBConv(in_channels, out_channels, stride=stride, expand_ratio=expand_ratio, drop_path=dpr_list[0]))
-        for block_idx in range(1, layers):
-            blocks.append(
-                MBConv(out_channels, out_channels, stride=1, expand_ratio=expand_ratio, drop_path=dpr_list[block_idx]))
-
-    if block_type == 'T':
-        blocks.append(FreBlock(in_channels, out_channels, stride=stride, expand_ratio=expand_ratio,
-                               drop_path=dpr_list[0], layer_scale_init_value=layer_scale_init_value))
-
-        for block_idx in range(1, layers):
-            blocks.append(
-                FreBlock(out_channels, out_channels, stride=1, expand_ratio=expand_ratio,
-                         drop_path=dpr_list[block_idx], layer_scale_init_value=layer_scale_init_value))
-
-    return nn.Sequential(*blocks)
-
-
-def make_layers3(in_channels, out_channels, layers, drop, dpr_list,layer_scale_init_value=1e-5):
-    blocks = []
-
-    blocks.append(DownsampleLayer(in_channels, out_channels))
-
-    for block_idx in range(layers):
-        blocks.append(DualBlock2(out_channels, drop=drop, drop_path=dpr_list[block_idx], layer_scale_init_value=layer_scale_init_value))
-
     return nn.Sequential(*blocks)
 
 
@@ -380,15 +310,6 @@ class CoFM(nn.Module):
                          'expand_ratio': [4, 4, 4, 4],
                          'drop_rate': [0., 0., 0., 0.],
                          'drop_path_rate': 0.5,
-                         'layer_scale_init_value': 1e-5}),
-
-        **dict.fromkeys(['l', 'large', 'L'],
-                        {'layers': [2, 12, 12, 2],
-                         'embed_dims': [160, 160, 320, 640, 1280],
-                         'strides': [2, 2, 2, 2],
-                         'expand_ratio': [4, 4, 4, 4],
-                         'drop_rate': [0., 0., 0., 0.],
-                         'drop_path_rate': 0.5,
                          'layer_scale_init_value': 1e-5})
     }
 
@@ -433,10 +354,6 @@ class CoFM(nn.Module):
 
         self.layers4 = make_layers(embed_dims[3], embed_dims[4], layers[3], expand_ratio[3], drop_rate[3], dpr_list[3],
                                    strides[3], layer_scale_init_value, 'T')       
-
-        # self.layers3 = make_layers3(embed_dims[2], embed_dims[3], layers[2], drop_rate[2], dpr_list[2], layer_scale_init_value)
-                                   
-        # self.layers4 = make_layers3(embed_dims[3], embed_dims[4], layers[3], drop_rate[3], dpr_list[3], layer_scale_init_value)  
 
         self.classifier = nn.Sequential(self.norm,
                                         nn.AdaptiveAvgPool2d(1),
@@ -495,9 +412,4 @@ def CoFM_Small(num_classes):
 
 def CoFM_Base(num_classes):
     model = CoFM(arch='b', num_classes=num_classes)
-    return model
-
-
-def CoFM_Large(num_classes):
-    model = CoFM(arch='l', num_classes=num_classes)
     return model

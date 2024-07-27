@@ -135,8 +135,7 @@ class DCNBlock(nn.Module):
 
         self.norm2 = nn.GroupNorm(1, dim)
 
-        # self.ms_ffn = MS_FFN(dim, hidden_features=hidden_dim, drop=drop)
-        self.ms_ffn = IRFFN(dim, hidden_features=hidden_dim, drop=drop)
+        self.ms_ffn = MS_FFN(dim, hidden_features=hidden_dim, drop=drop)
 
         if layer_scale is not None and type(layer_scale) in [int, float]:
             self.gamma1 = nn.Parameter(layer_scale * torch.ones(dim, 1, 1))

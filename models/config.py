@@ -1,6 +1,6 @@
-from .cofm import CoFM_Micro, CoFM_Miny, CoFM_Tiny, CoFM_Small, CoFM_Base, CoFM_Large
+from .cofm import CoFM_Micro, CoFM_Miny, CoFM_Tiny, CoFM_Small, CoFM_Base
 
-models = ['CoFM_Micro','CoFM_Miny', 'CoFM_Tiny', 'CoFM_Small', 'CoFM_Base', 'CoFM_Large']         
+models = ['CoFM_Micro','CoFM_Miny', 'CoFM_Tiny', 'CoFM_Small', 'CoFM_Base']         
 
 
 def get_model(name, num_class):
@@ -15,8 +15,6 @@ def get_model(name, num_class):
         net = CoFM_Small(num_class)
     elif name.lower() == 'cofm_base':
         net = CoFM_Base(num_class)
-    elif name.lower() == 'cofm_large':
-        net = CoFM_Large(num_class)
     else:
         raise NotImplementedError()
 

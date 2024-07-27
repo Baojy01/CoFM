@@ -29,17 +29,6 @@ class ChannelAtt(nn.Module):
         return y
 
 
-class PixelAtt(nn.Module):
-    def __init__(self, channels):
-        super(PixelAtt, self).__init__()
-        self.conv = nn.Conv2d(channels, channels, kernel_size=1, bias=False)
-        self.sig = nn.Sigmoid()
-
-    def forward(self, x):
-        out = self.sig(self.conv(x))
-        return out
-
-
 class HighFreMixer(nn.Module):
     def __init__(self, channels):
         super().__init__()
@@ -61,7 +50,6 @@ class CAFM(nn.Module):
     def __init__(self, channels):
         super(CAFM, self).__init__()
         self.ca = ChannelAtt(channels)
-        # self.pa = PixelAtt(channels)
         self.pa = HighFreMixer(channels)
 
     def forward(self, x):

@@ -4,19 +4,6 @@ from .drop_path import DropPath
 from .norm_act import act_layer, norm_layer
 
 
-class SEModule_small(nn.Module):
-    def __init__(self, channel):
-        super(SEModule_small, self).__init__()
-        self.fc = nn.Sequential(
-            nn.Linear(channel, channel, bias=False),
-            nn.Hardsigmoid(inplace=True)
-        )
-
-    def forward(self, x):
-        y = self.fc(x)
-        return x * y
-
-
 class SELayer(nn.Module):
     def __init__(self, channel, expansion=0.25):
         super(SELayer, self).__init__()

@@ -27,7 +27,7 @@ parser = argparse.ArgumentParser(description='PyTorch image training')
 parser.add_argument('--seed', default=42, type=int, help='Seed for initializing training')
 parser.add_argument('--arch', default='CoFM_Miny', choices=model_names, metavar='ARCH', help='Models architecture')
 parser.add_argument('--dataset', default='imagenet1k', choices=['imagenet1k', 'cifar10', 'cifar100'], help='Dataset for training')
-parser.add_argument('--data-dir', default='../autodl-tmp/ImageNet', help='Path to dataset')
+parser.add_argument('--data-dir', default='', help='Path to dataset')
 parser.add_argument('--num-classes', default=1000, type=int, help='Number of classes for classification')
 parser.add_argument('--input-size', default=224, type=int, help='Input image size')
 
@@ -296,7 +296,6 @@ def main():
     # os.environ['CUDA_VISIBLE_DEVICES'] = '0, 1'
     args.nprocs = torch.cuda.device_count()
     print('use {} gpus!'.format(args.nprocs))
-    # args.lr =  args.lr * args.nprocs
     mp.spawn(run, nprocs=args.nprocs, args=(args, ))
     
     print('Finished Training!')
